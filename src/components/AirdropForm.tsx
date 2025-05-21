@@ -1,10 +1,11 @@
 "use client"
 
 import InputField from "@/components/ui/InputField";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { chainsToTSender, tsenderAbi, erc20Abi } from "@/constants"
-import { useChainId, useConfig, useAccount} from "wagmi";
+import { useChainId, useConfig, useAccount, useWriteContract} from "wagmi";
 import { readContract } from "@wagmi/core"
+import { calculateTotal} from "@/utils/calculateTotal/calculateTotal"
 
 export default function AirdropForm (){
     const [tokenAddress, setTokenAddress] = useState("")
@@ -13,6 +14,11 @@ export default function AirdropForm (){
     const chainId = useChainId()
     const config = useConfig()
     const account = useAccount()
+    const total: number = useMemo(() => calculateTotal(amounts), [amounts])
+    const { data: hash, isPending, error, writeContractAsync } = useWriteContract()
+   
+
+
 
     async function getApprovedAmount(tSenderAddress: string | null):Promise<number> {
        if(!tSenderAddress){
@@ -38,6 +44,7 @@ export default function AirdropForm (){
       //3. Wait for the transaction to be mined
       const tSenderAddress = chainsToTSender[chainId]["tsender"]
       const approvedAmount = await getApprovedAmount(tSenderAddress)
+      console.log(approvedAmount)
       
     }
    
@@ -64,9 +71,11 @@ export default function AirdropForm (){
               large={true}
             /> 
   
-            <button onClick={handleSubmit}>
-               Send tokens
-            </button >
-        </div>
+  <button onClick={handleSubmit}
+  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+  Send tokens
+</button>
+
+</div>
     )
 }
